@@ -64,7 +64,7 @@ class CMakeCompileCommands:
             The sourceFile must be provided as absolute path.
             If no information to this file are found, a ValueError is raised.
         """
-        Any.requireIsFileNonEmpty( sourceFile )
+        Any.requireIsTextNonEmpty( sourceFile )
 
         for item in self._data:
             # Each item in self._data is a JSON-encoded dictionary with 3 entries:
@@ -92,7 +92,7 @@ class CMakeCompileCommands:
             The sourceFile must be provided as absolute path.
             If no information to this file are found, a ValueError is raised.
         """
-        Any.requireIsFileNonEmpty( sourceFile )
+        Any.requireIsTextNonEmpty( sourceFile )
 
         command = self.getCompilerCommand( sourceFile )
         result  = ''
@@ -118,7 +118,7 @@ class CMakeCompileCommands:
 
             If no additional paths are set, an empty string will be returned.
         """
-        Any.requireIsFileNonEmpty( sourceFile )
+        Any.requireIsTextNonEmpty( sourceFile )
 
         command = self.getCompilerCommand( sourceFile )
         result  = ''
@@ -128,6 +128,29 @@ class CMakeCompileCommands:
                 result += candidate + ' '
 
         return result
+
+
+    def getLanguageStdOption( self, sourceFile: str ) -> str:
+        """
+            Returns the option passed to the compiler to specify the
+            C/C++ language standard, e.g. "-std=c99".
+
+            The sourceFile must be provided as absolute path.
+
+            If no information to this file are found, a ValueError is raised.
+
+            If no language standard was passed to the compiler, and empty
+            string will be returned.
+        """
+        Any.requireIsTextNonEmpty( sourceFile )
+
+        command = self.getCompilerCommand( sourceFile )
+
+        for candidate in shlex.split( command ):
+            if candidate.startswith( '-std=' ):
+                return candidate
+
+        return ''
 
 
     def _loadFile( self ):
