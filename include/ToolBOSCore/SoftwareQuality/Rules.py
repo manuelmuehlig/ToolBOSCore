@@ -3213,10 +3213,8 @@ def createCParser( filePath, details ):
         raise e
 
     if useCParser:
-        logging.debug( 'creating CParser' )
         parser = CParser( filePath, isCPlusPlus, langStd, includes.split(),
                           defines.split(), args.split() )
-        logging.debug( 'successfully created CParser: %s', parser )
     else:
         raise AssertionError( 'CParser disabled to avoid segfault, see TBCORE-2216' )
 

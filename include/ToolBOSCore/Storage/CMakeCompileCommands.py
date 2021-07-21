@@ -49,9 +49,9 @@ class CMakeCompileCommands:
             'build/<platformName>/compile_commands.json'.
         """
         Any.requireIsFileNonEmpty( filePath )
-        self._filePath = filePath
 
-        self._data = None
+        self._filePath = filePath
+        self._data     = None
 
         self._loadFile()
 
