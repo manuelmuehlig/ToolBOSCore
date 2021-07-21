@@ -55,9 +55,7 @@ from ToolBOSCore.Settings.ProcessEnv              import source, sourceFromHere
 from ToolBOSCore.Settings.ToolBOSConf             import getConfigOption
 from ToolBOSCore.SoftwareQuality.Common           import *
 from ToolBOSCore.Storage                          import CMakeCompileCommands, SIT
-from ToolBOSCore.Tools                            import CMake, Klocwork,\
-                                                         Matlab, PyCharm,\
-                                                         Valgrind
+from ToolBOSCore.Tools                            import Klocwork, Matlab, PyCharm, Valgrind
 from ToolBOSCore.Util                             import Any, FastScript
 
 
