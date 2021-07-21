@@ -3177,8 +3177,6 @@ def createCParser( filePath, details ):
     absFilePath  = os.path.abspath( filePath )
     cccFile      = os.path.join( details.buildDirArch, 'compile_commands.json' )
     isCPlusPlus  = filePath.endswith( '.cpp' )
-    targetName   = details.packageName + '-global'
-    hostPlatform = getHostPlatform()
 
     try:
         ccc      = CMakeCompileCommands.CMakeCompileCommands( cccFile )
@@ -3190,12 +3188,12 @@ def createCParser( filePath, details ):
         logging.error( e )
         return None
 
-    return CParser( filePath,
-                    isCPlusPlus,
-                    langStd,
-                    args=args.split(),
-                    includepaths=includes.split(),
-                    defines=defines.split() )
+    logging.debug( 'creating CParser' )
+    parser = CParser( filePath, isCPlusPlus, langStd, includes.split(),
+                      defines.split(), args.split() )
+    logging.debug( 'successfully created CParser: %s', parser )
+
+    return parser
 
 
 def getRules():

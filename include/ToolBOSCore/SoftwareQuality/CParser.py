@@ -108,7 +108,8 @@ class CParser( Namespace ):
                 logging.error( 'unsupported platform: %s', hostPlatform )
                 return
 
-            logging.debug( 'loading library: %s', libPath )
+            exists = 'exists' if Any.isExisting( libPath ) else 'not existing'
+            logging.debug( 'loading library: %s (%s)', libPath, exists )
             Any.requireIsFileNonEmpty( libPath )
             cidx.Config.set_library_file( libPath )
             self._index = cidx.Index.create()
@@ -146,18 +147,30 @@ class CParser( Namespace ):
         """
             Populates the macro definitions in defs['macros'] and defs['fnmacros']
         """
-        logging.debug( 'calling clang_macroinfo.get_macros()' )
+        # variable names and order as in clang_macroinfo.get_macros() prototype
+        filename      = filepath.encode( 'utf8' )
+        includepaths  = [ p.encode( 'utf8' ) for p in includepaths ]
+        verbose       = True
+        defines       = [ d.encode( 'utf8' ) for d in defines ]
+        langStdSwitch = langStd.encode( 'utf8' )
 
-        macroTuples = clang_macroinfo.get_macros( filepath.encode( 'utf8' ),
-                                                  [ p.encode( 'utf8' ) for p in includepaths ],
-                                                  True,
-                                                  [ d.encode( 'utf8' ) for d in defines ],
-                                                  langStd.encode( 'utf8' ) )
+        logging.debug( 'calling clang_macroinfo.get_macros()' )
+        logging.debug( 'filename:      %s', filename )
+        logging.debug( 'includepaths:  %s', includepaths )
+        logging.debug( 'verbose:       %s', verbose )
+        logging.debug( 'defines:       %s', defines )
+        logging.debug( 'langStdSwitch: %s', langStdSwitch )
+
+        macroTuples = clang_macroinfo.get_macros( filename,
+                                                  includepaths,
+                                                  verbose,
+                                                  defines,
+                                                  langStdSwitch )
 
         logging.debug( 'calling clang_macroinfo.get_macros() finished' )
 
-        macros   = { }
-        fnmacros = { }
+        macros   = {}
+        fnmacros = {}
 
         for mt in macroTuples.values():
             # mt.args is None for simple macros, a list for function style macros.
