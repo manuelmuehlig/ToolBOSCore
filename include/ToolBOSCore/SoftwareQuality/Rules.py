@@ -1185,11 +1185,16 @@ b, instead of being 33 like it should, would actually be replaced with
                     moduleUpper  = module.upper()
                     packageUpper = details.packageName.upper()
 
+                    logging.debug( 'checking %s', filePath )
+
                     try:
                         parser = createCParser( filePath, details )
-                    except ( AssertionError, IOError, ValueError ) as e:
+                    except ( AssertionError, IOError ) as e:
                         logging.error( e )
                         return FAILED, 0, 1, 'unable to run CParser'
+                    except ValueError as e:
+                        logging.debug( 'skipping file (%s)', e )
+                        continue
 
                     for define in parser.localMacros:
 
@@ -1282,11 +1287,16 @@ updated and still passes parameters.'''
 
                 if ext in C_SOURCE_EXTENSIONS:
 
+                    logging.debug( 'checking %s', filePath )
+
                     try:
                         parser = createCParser( filePath, details )
-                    except (AssertionError, IOError, ValueError) as e:
+                    except ( AssertionError, IOError ) as e:
                         logging.error( e )
                         return FAILED, 0, 1, 'unable to run CParser'
+                    except ValueError as e:
+                        logging.debug( 'skipping file (%s)', e )
+                        continue
 
                     protos = parser.getFunctionPrototypesWithoutParameters( filePath )
 
@@ -1931,11 +1941,16 @@ circumstances.'''
                 _, ext = os.path.splitext( filePath )
                 if ext in C_CPP_SOURCE_EXTENSIONS:
 
+                    logging.debug( 'checking %s', filePath )
+
                     try:
                         parser = createCParser( filePath, details )
-                    except ( AssertionError, IOError, ValueError ) as e:
+                    except ( AssertionError, IOError ) as e:
                         logging.error( e )
                         return FAILED, 0, 1, 'unable to run CParser'
+                    except ValueError as e:
+                        logging.debug( 'skipping file (%s)', e )
+                        continue
 
                     for define in parser.localMacros.values():
 
@@ -2842,13 +2857,16 @@ literals their use in safety-critical application is highly discouraged.'''
                 _, ext = os.path.splitext( filePath )
                 if ext in C_CPP_SOURCE_EXTENSIONS:
 
+                    logging.debug( 'checking %s', filePath )
+
                     try:
                         parser = createCParser( filePath, details )
-                    except ( AssertionError, IOError, ValueError ) as e:
+                    except ( AssertionError, IOError ) as e:
                         logging.error( e )
                         return FAILED, 0, 1, 'unable to run CParser'
-
-                    logging.debug( 'checking %s', filePath )
+                    except ValueError as e:
+                        logging.debug( 'skipping file (%s)', e )
+                        continue
 
                     funCalls = parser.getFunctionCalls( filePath )
                     decls    = parser.getVariableDeclarations( filePath )
