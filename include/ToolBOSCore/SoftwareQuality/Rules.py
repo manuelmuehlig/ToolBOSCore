@@ -1187,7 +1187,7 @@ b, instead of being 33 like it should, would actually be replaced with
                     logging.debug( 'checking %s', filePath )
 
                     try:
-                        parser = createCParser( filePath, details )
+                        parser = _createCParser( filePath, details )
                     except ( AssertionError, IOError ) as e:
                         logging.error( e )
                         return FAILED, 0, 1, 'unable to run CParser'
@@ -1289,7 +1289,7 @@ updated and still passes parameters.'''
                     logging.debug( 'checking %s', filePath )
 
                     try:
-                        parser = createCParser( filePath, details )
+                        parser = _createCParser( filePath, details )
                     except ( AssertionError, IOError ) as e:
                         logging.error( e )
                         return FAILED, 0, 1, 'unable to run CParser'
@@ -1943,7 +1943,7 @@ circumstances.'''
                     logging.debug( 'checking %s', filePath )
 
                     try:
-                        parser = createCParser( filePath, details )
+                        parser = _createCParser( filePath, details )
                     except ( AssertionError, IOError ) as e:
                         logging.error( e )
                         return FAILED, 0, 1, 'unable to run CParser'
@@ -2859,7 +2859,7 @@ literals their use in safety-critical application is highly discouraged.'''
                     logging.debug( 'checking %s', filePath )
 
                     try:
-                        parser = createCParser( filePath, details )
+                        parser = _createCParser( filePath, details )
                     except ( AssertionError, IOError ) as e:
                         logging.error( e )
                         return FAILED, 0, 1, 'unable to run CParser'
@@ -2880,8 +2880,8 @@ literals their use in safety-critical application is highly discouraged.'''
                             logging.info( 'SAFE05: %s:%d - Unsafe declaration %s %s',
                                           filePath, line, typ, decl )
 
-                    passedInFile, failedInFile = findNonAsciiCharacters( filePath,
-                                                                         'SAFE05')
+                    passedInFile, failedInFile = _findNonAsciiCharacters( filePath,
+                                                                         'SAFE05' )
 
 
                     if passedInFile > 0:
@@ -3166,7 +3166,7 @@ applications.'''
     sqLevel     = frozenset( [ 'advanced', 'safety' ] )
 
 
-def findNonAsciiCharacters( filePath, rule ):
+def _findNonAsciiCharacters( filePath, rule ):
     content = FastScript.getFileContent( filePath, splitLines=True )
     passed  = 0
     failed  = 0
@@ -3193,10 +3193,10 @@ def findNonAsciiCharacters( filePath, rule ):
 # With the following switch the CParser usage can be toggled until
 # the problem is solved:
 
-useCParser = False
+_useCParser = False
 
 
-def createCParser( filePath, details ):
+def _createCParser( filePath, details ):
     from ToolBOSCore.SoftwareQuality.CParser import CParser
 
     absFilePath  = os.path.abspath( filePath )
@@ -3212,7 +3212,7 @@ def createCParser( filePath, details ):
     except ( AssertionError, IOError, ValueError ) as e:
         raise e
 
-    if useCParser:
+    if _useCParser:
         parser = CParser( filePath, isCPlusPlus, langStd, includes.split(),
                           defines.split(), args.split() )
     else:
