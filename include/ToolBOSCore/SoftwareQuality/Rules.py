@@ -70,6 +70,8 @@ C_HEADER_EXTENSIONS     = ( '.h', )
 
 C_CPP_HEADER_EXTENSIONS = ('.h', '.hpp', 'hh', 'hxx')
 
+C_SOURCE_EXTENSIONS     = ( '.c', )
+
 C_CPP_SOURCE_EXTENSIONS = ( '.c', '.cpp' )
 
 
@@ -1183,10 +1185,11 @@ b, instead of being 33 like it should, would actually be replaced with
                     moduleUpper  = module.upper()
                     packageUpper = details.packageName.upper()
 
-                    parser = createCParser( filePath, details )
-
-                    if not parser:
-                        continue
+                    try:
+                        parser = createCParser( filePath, details )
+                    except ( AssertionError, IOError, ValueError ) as e:
+                        logging.error( e )
+                        return FAILED, 0, 1, 'unable to run CParser'
 
                     for define in parser.localMacros:
 
@@ -1278,10 +1281,12 @@ updated and still passes parameters.'''
                 _, ext = os.path.splitext( filePath )
 
                 if ext in C_SOURCE_EXTENSIONS:
-                    parser = createCParser( filePath, details )
 
-                    if not parser:
-                        continue
+                    try:
+                        parser = createCParser( filePath, details )
+                    except (AssertionError, IOError, ValueError) as e:
+                        logging.error( e )
+                        return FAILED, 0, 1, 'unable to run CParser'
 
                     protos = parser.getFunctionPrototypesWithoutParameters( filePath )
 
@@ -1926,10 +1931,11 @@ circumstances.'''
                 _, ext = os.path.splitext( filePath )
                 if ext in C_CPP_SOURCE_EXTENSIONS:
 
-                    parser = createCParser( filePath, details )
-
-                    if not parser:
-                        continue
+                    try:
+                        parser = createCParser( filePath, details )
+                    except ( AssertionError, IOError, ValueError ) as e:
+                        logging.error( e )
+                        return FAILED, 0, 1, 'unable to run CParser'
 
                     for define in parser.localMacros.values():
 
@@ -2836,10 +2842,11 @@ literals their use in safety-critical application is highly discouraged.'''
                 _, ext = os.path.splitext( filePath )
                 if ext in C_CPP_SOURCE_EXTENSIONS:
 
-                    parser = createCParser( filePath, details )
-
-                    if not parser:
-                        continue
+                    try:
+                        parser = createCParser( filePath, details )
+                    except ( AssertionError, IOError, ValueError ) as e:
+                        logging.error( e )
+                        return FAILED, 0, 1, 'unable to run CParser'
 
                     logging.debug( 'checking %s', filePath )
 
@@ -3185,8 +3192,7 @@ def createCParser( filePath, details ):
         defines  = ccc.getDefinesAsString( absFilePath )
         args     = langStd + ' ' + includes + ' ' + defines
     except ( AssertionError, IOError, ValueError ) as e:
-        logging.error( e )
-        return None
+        raise e
 
     logging.debug( 'creating CParser' )
     parser = CParser( filePath, isCPlusPlus, langStd, includes.split(),
