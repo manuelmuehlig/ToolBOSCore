@@ -3170,7 +3170,7 @@ def createCParser( filePath, details ):
                     "%s: No such directory (forgot to compile?)" % details.buildDirArch )
 
     try:
-        from ToolBOSCore.SoftwareQuality.CAnalyzer import CParser
+        from ToolBOSCore.SoftwareQuality.CParser import CParser
     except ModuleNotFoundError as e:
         raise EnvironmentError( e )
 

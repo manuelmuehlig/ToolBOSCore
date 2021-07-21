@@ -39,12 +39,12 @@ import clang_macroinfo
 import clang.cindex as cidx
 from clang.cindex import CursorKind, TypeKind
 
-from ToolBOSCore.Platforms                         import Platforms
-from ToolBOSCore.Settings                          import ToolBOSConf
-from ToolBOSCore.SoftwareQuality.CAnalyzerElements import MacroDefinition,\
-                                                          MacroFnDefinition, \
-                                                          Namespace
-from ToolBOSCore.Util                              import Any
+from ToolBOSCore.Platforms                       import Platforms
+from ToolBOSCore.Settings                        import ToolBOSConf
+from ToolBOSCore.SoftwareQuality.CParserElements import MacroDefinition,\
+                                                        MacroFnDefinition, \
+                                                        Namespace
+from ToolBOSCore.Util                            import Any
 
 
 class CParser( Namespace ):
@@ -319,5 +319,6 @@ class CParser( Namespace ):
         from ToolBOSCore.BuildSystem.Compilers import getIncludePaths
 
         return getIncludePaths( 'clang-%s' % clang_macroinfo.VERSION, 'c++' ) or getIncludePaths( 'clang', 'c++' )
+
 
 # EOF

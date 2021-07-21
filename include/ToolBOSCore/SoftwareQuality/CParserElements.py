@@ -1087,4 +1087,6 @@ class Namespace( DefinitionWithCursor ):
         ns.defs[ 'namespaces' ]         = self._localNamespaces( filepath )
 
         return ns
+
+
 # EOF
