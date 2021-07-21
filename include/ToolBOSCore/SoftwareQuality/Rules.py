@@ -50,7 +50,6 @@ from ToolBOSCore.BuildSystem                      import BuildSystemTools
 from ToolBOSCore.BuildSystem.DocumentationCreator import DocumentationCreator
 from ToolBOSCore.Packages.BSTPackage              import BSTSourcePackage
 from ToolBOSCore.Packages.PackageDetector         import PackageDetector
-from ToolBOSCore.Platforms.Platforms              import getHostPlatform
 from ToolBOSCore.Settings.ProcessEnv              import source, sourceFromHere
 from ToolBOSCore.Settings.ToolBOSConf             import getConfigOption
 from ToolBOSCore.SoftwareQuality.Common           import *
@@ -3189,6 +3188,14 @@ def findNonAsciiCharacters( filePath, rule ):
     return passed, failed
 
 
+# TBCORE-2216 clang_macroinfo.get_macros() crashes with segfault
+#
+# With the following switch the CParser usage can be toggled until
+# the problem is solved:
+
+useCParser = False
+
+
 def createCParser( filePath, details ):
 
     Any.requireMsg( Any.isDir( details.buildDirArch ),
@@ -3212,10 +3219,13 @@ def createCParser( filePath, details ):
     except ( AssertionError, IOError, ValueError ) as e:
         raise e
 
-    logging.debug( 'creating CParser' )
-    parser = CParser( filePath, isCPlusPlus, langStd, includes.split(),
-                      defines.split(), args.split() )
-    logging.debug( 'successfully created CParser: %s', parser )
+    if useCParser:
+        logging.debug( 'creating CParser' )
+        parser = CParser( filePath, isCPlusPlus, langStd, includes.split(),
+                          defines.split(), args.split() )
+        logging.debug( 'successfully created CParser: %s', parser )
+    else:
+        raise AssertionError( 'CParser disabled to avoid segfault, see TBCORE-2216' )
 
     return parser
 
