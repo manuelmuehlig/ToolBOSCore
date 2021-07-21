@@ -3197,14 +3197,7 @@ useCParser = False
 
 
 def createCParser( filePath, details ):
-
-    Any.requireMsg( Any.isDir( details.buildDirArch ),
-                    "%s: No such directory (forgot to compile?)" % details.buildDirArch )
-
-    try:
-        from ToolBOSCore.SoftwareQuality.CParser import CParser
-    except ModuleNotFoundError as e:
-        raise EnvironmentError( e )
+    from ToolBOSCore.SoftwareQuality.CParser import CParser
 
     absFilePath  = os.path.abspath( filePath )
     cccFile      = os.path.join( details.buildDirArch, 'compile_commands.json' )
