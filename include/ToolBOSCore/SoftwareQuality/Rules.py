@@ -1178,7 +1178,7 @@ b, instead of being 33 like it should, would actually be replaced with
         try:
             for filePath in files:
                 _, ext = os.path.splitext( filePath )
-                if ext in C_CPP_SOURCE_EXTENSIONS:
+                if ext in C_CPP_HEADER_EXTENSIONS:
                     basename     = os.path.basename( filePath )
                     module       = os.path.splitext( basename )[0]
                     moduleUpper  = module.upper()
