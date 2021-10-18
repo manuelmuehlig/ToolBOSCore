@@ -326,7 +326,7 @@ class TerminalWidget( QWidget, object ):
 
         self.path = path
         self._updateLabel()
-        self.writeText( '%s\n' % self.path )
+        self.writeText( self.path )
 
 
     def setOutputFilter( self, func ):
@@ -527,19 +527,19 @@ class TerminalWidget( QWidget, object ):
         self.textField.ensureCursorVisible()
 
         if status == 'no process':
-            self.writeText( '[no process running]\n' )
+            self.writeText( '[no process running]' )
 
         elif self._terminating:
             self.textField.setColor( self._exitFailureColor )
-            self.writeText( '[Terminated]\n' )
+            self.writeText( '[Terminated]' )
 
         elif status == 0:
             self.textField.setColor( self._exitSuccessColor )
-            self.writeText( '[Done]\n' )
+            self.writeText( '[Done]' )
 
         else:
             self.textField.setColor( self._exitFailureColor )
-            self.writeText( '[Exited with status %d]\n' % status )
+            self.writeText( '[Exited with status %d]' % status )
 
         self.textField.ensureCursorVisible()
 
@@ -588,6 +588,8 @@ class TerminalWidget( QWidget, object ):
             self._standalone              = False
             self._tooltipText             = ''
             self._terminalLineLimit       = terminallinelimit
+            self._terminalCurrentLine     = 0
+            self._terminalLines           = 0
 
             self._highlightCharNone   = QTextCharFormat()
             self._highlightCharNone.setFontFamily( "Courier New" )
@@ -654,28 +656,20 @@ class TerminalWidget( QWidget, object ):
 
         def writeCommand( self, command ):
             if not self._frozen:
-                self._cursorToEnd()
-                self.append( '<b>$ %s</b><br/>\n' % command )
-                self._cursorToEnd()
-
+                self.writeText( '<b>$ %s</b><br/>' % command, html=True )
                 self._haveReRunAction = True
 
 
-        def writeText( self, toWrite ):
+        def writeText( self, toWrite, html=False ):
             if not self._frozen:
 
                 for line in toWrite.split('\n'):
                     if not line:
                         continue
 
-                    text = UnicodeSupport.convert( line ) + '\n'
+                    text = UnicodeSupport.convert( line )
 
-                    self._cursorToEnd()
-                    cursor = self.textCursor()
-
-                    begin = cursor.position()
-                    self.insertPlainText( text )
-                    end   = cursor.position()
+                    cursor = self._printText( text, html=html )
 
                     if text.find( 'error:' ) >= 0 or \
                        text.find( '[ERROR]' ) >= 0 or \
@@ -690,15 +684,13 @@ class TerminalWidget( QWidget, object ):
 
                         highlightChar    = self._highlightCharWarn
                         highlightBlock   = self._highlightBlockWarn
-
-
                     else:
                         highlightChar    = self._highlightCharNone
                         highlightBlock   = self._highlightBlockNone
 
-
-                    cursor.setPosition( begin, QTextCursor.MoveAnchor )
-                    cursor.setPosition( end, QTextCursor.KeepAnchor )
+                    # cursor.setPosition( begin, QTextCursor.MoveAnchor )
+                    # cursor.setPosition( end, QTextCursor.KeepAnchor )
+                    cursor.select( QTextCursor.LineUnderCursor )
 
                     Any.requireIsInstance( highlightChar, QTextCharFormat )
                     cursor.setCharFormat( highlightChar )
@@ -706,38 +698,68 @@ class TerminalWidget( QWidget, object ):
                     Any.requireIsInstance( highlightBlock, QTextBlockFormat )
                     cursor.setBlockFormat( highlightBlock )
 
-                    self._cursorToEnd()
+                    if cursor.hasSelection():
+                        cursor.clearSelection()
+
+                    self._terminalCurrentLine += 1
 
 
         def _clearTerminal( self ):
             self.clear()
+            self._terminalCurrentLine = 0
 
 
-        def _cursorToEnd( self ):
+        def _printText( self, text, html=False ):
             """
                 Mouse clicks change the cursor position, hence we need to
-                update the cursor's write location (move back to end of
-                text) otherwise build logs get mixed up.
+                update the cursor's write location (move to the active line)
+                otherwise build logs get mixed up.
 
                 This function considers the self._autoScroll property:
                 If 'True' then the vertical scrollbar will always be at the
-                bottom to allow the user reading the very latest loglines.
+                more recent log line to allow the user reading the very latest loglines.
                 If self._autoScroll is False the scrollbar won't change its
                 position.
             """
+            # Get the actual number of lines
+            self._terminalLines = self.document().blockCount()
+
             scrollBar       = self.verticalScrollBar()
             oldScrollBarPos = scrollBar.value()
 
-            cursor = self.textCursor()
-            cursor.movePosition( QTextCursor.End, QTextCursor.MoveAnchor )
+            if not self._terminalLineLimit or self._terminalLines < self._terminalLineLimit:
+                cursor = self.textCursor()
+                cursor.movePosition( QTextCursor.End, QTextCursor.MoveAnchor )
+                self.setTextCursor( cursor )
+                # when appending we need a \n to create a new line
+                text += '\n'
+
+            # if we go over the limit then reset the current line
+            else:
+                if self._terminalCurrentLine >= self._terminalLineLimit:
+                    self._terminalCurrentLine = 0
+
+                cursor = QTextCursor( self.document().findBlockByLineNumber( self._terminalCurrentLine ) )
+                cursor.select( QTextCursor.LineUnderCursor )
+
+            if html:
+                cursor.insertHtml( text )
+            else:
+                cursor.insertText( text )
+
+            if cursor.hasSelection():
+                cursor.clearSelection()
+
             self.setTextCursor( cursor )
 
             if not self._autoScroll:
                 scrollBar.setValue( oldScrollBarPos )
 
+            return cursor
+
 
         def _freeze( self ):
-            self.writeText( '[Terminal frozen]\n' )
+            self.writeText( '[Terminal frozen]' )
             self._frozen = True
 
 
@@ -823,7 +845,7 @@ class TerminalWidget( QWidget, object ):
 
         def _unfreeze( self ):
             self._frozen = False
-            self.writeText( '[Terminal activated]\n' )
+            self.writeText( '[Terminal activated]' )
 
 
 class MultiTermWidget( QGroupBox, object ):
