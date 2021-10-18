@@ -576,7 +576,6 @@ class TerminalWidget( QWidget, object ):
             super( QTextEdit, self ).__init__( parent )
 
             self.setReadOnly( True )
-            self.setFontFamily( "Courier New" )
             self.setContextMenuPolicy( Qt.CustomContextMenu )
             self.customContextMenuRequested.connect( self._showContextMenu )
 
@@ -591,23 +590,25 @@ class TerminalWidget( QWidget, object ):
             self._terminalCurrentLine     = 0
             self._terminalLines           = 0
 
+            self._defaultFont             = QFont( "Monospace", 9, QFont.Monospace )
+            self._defaultFont.setStyleHint( QFont.TypeWriter )
+
+            self.setFont( self._defaultFont )
+
             self._highlightCharNone   = QTextCharFormat()
-            self._highlightCharNone.setFontFamily( "Courier New" )
-            self._highlightCharNone.setFontPointSize( 9 )
+            self._highlightCharNone.setFont( self._defaultFont )
 
             self._highlightBlockNone  = QTextBlockFormat()
 
             self._highlightCharWarn   = QTextCharFormat()
-            self._highlightCharWarn.setFontFamily( "Courier New" )
-            self._highlightCharWarn.setFontPointSize( 9 )
+            self._highlightCharWarn.setFont( self._defaultFont )
 
             self._highlightBlockWarn  = QTextBlockFormat()
             self._highlightBlockWarn.setBackground( warningColor )
 
             self._highlightCharError  = QTextCharFormat()
-            self._highlightCharError.setFontFamily( "Courier New" )
+            self._highlightCharError.setFont( self._defaultFont )
             self._highlightCharError.setFontWeight( QFont.Bold )
-            self._highlightCharError.setFontPointSize( 9 )
 
             self._highlightBlockError = QTextBlockFormat()
             self._highlightBlockError.setBackground( errorColor )
