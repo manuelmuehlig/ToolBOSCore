@@ -68,7 +68,7 @@ class TerminalWidget( QWidget, object ):
     def __init__( self, readonly, inactiveColor=lightGrey,
                   runColor=lightYellow, exitSuccessColor=lightGreen,
                   exitFailureColor=lightRed, warningHighlightColor=lightOrange,
-                  errorHighlightColor=solidRed, parent=None ):
+                  errorHighlightColor=solidRed, terminallinelimit=0, parent=None ):
 
         Any.requireIsBool( readonly )
         Any.requireIsInstance( inactiveColor,         QColor )
@@ -77,6 +77,7 @@ class TerminalWidget( QWidget, object ):
         Any.requireIsInstance( exitFailureColor,      QColor )
         Any.requireIsInstance( warningHighlightColor, QColor )
         Any.requireIsInstance( errorHighlightColor,   QColor )
+        Any.requireIsInt( terminallinelimit )
 
         super( QWidget, self ).__init__()
 
@@ -105,6 +106,8 @@ class TerminalWidget( QWidget, object ):
         self._oldWinFlags   = None
         self._outputFilter  = None
         self._terminating   = False
+
+        self._terminallinelimit     = terminallinelimit
 
         self._inactiveColor         = inactiveColor
         self._runColor              = runColor
@@ -156,6 +159,7 @@ class TerminalWidget( QWidget, object ):
 
         self.textField = self._TerminalTextEdit( warningColor=warningHighlightColor,
                                                  errorColor=errorHighlightColor,
+                                                 terminallinelimit=terminallinelimit,
                                                  parent=parent )
 
         self.textField.setColor( self._inactiveColor )
@@ -563,10 +567,11 @@ class TerminalWidget( QWidget, object ):
 
 
         def __init__( self, warningColor=lightOrange,
-                      errorColor=solidRed, parent=None ):
+                      errorColor=solidRed, terminallinelimit=0, parent=None ):
 
             Any.requireIsInstance( warningColor, QColor )
             Any.requireIsInstance( errorColor, QColor )
+            Any.requireIsInt( terminallinelimit )
 
             super( QTextEdit, self ).__init__( parent )
 
@@ -582,6 +587,7 @@ class TerminalWidget( QWidget, object ):
             self._haveTerminateAllAction  = False
             self._standalone              = False
             self._tooltipText             = ''
+            self._terminalLineLimit       = terminallinelimit
 
             self._highlightCharNone   = QTextCharFormat()
             self._highlightCharNone.setFontFamily( "Courier New" )
