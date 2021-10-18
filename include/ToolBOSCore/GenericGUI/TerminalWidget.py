@@ -658,45 +658,49 @@ class TerminalWidget( QWidget, object ):
         def writeText( self, toWrite ):
             if not self._frozen:
 
-                text = UnicodeSupport.convert( toWrite )
+                for line in toWrite.split('\n'):
+                    if not line:
+                        continue
 
-                self._cursorToEnd()
-                cursor = self.textCursor()
+                    text = UnicodeSupport.convert( line ) + '\n'
 
-                begin = cursor.position()
-                self.insertPlainText( text )
-                end   = cursor.position()
+                    self._cursorToEnd()
+                    cursor = self.textCursor()
 
-                if text.find( 'error:' ) >= 0 or \
-                   text.find( '[ERROR]' ) >= 0 or \
-                   text.find( 'make: *** [all] Error' ) >= 0:
+                    begin = cursor.position()
+                    self.insertPlainText( text )
+                    end   = cursor.position()
 
-                    highlightChar    = self._highlightCharError
-                    highlightBlock   = self._highlightBlockError
-                    self._autoScroll = False
+                    if text.find( 'error:' ) >= 0 or \
+                       text.find( '[ERROR]' ) >= 0 or \
+                       text.find( 'make: *** [all] Error' ) >= 0:
 
-                elif text.find( 'warning:' ) >= 0 or \
-                     text.find( '[WARNING]' ) >= 0:
+                        highlightChar    = self._highlightCharError
+                        highlightBlock   = self._highlightBlockError
+                        self._autoScroll = False
 
-                    highlightChar    = self._highlightCharWarn
-                    highlightBlock   = self._highlightBlockWarn
+                    elif text.find( 'warning:' ) >= 0 or \
+                         text.find( '[WARNING]' ) >= 0:
 
-
-                else:
-                    highlightChar    = self._highlightCharNone
-                    highlightBlock   = self._highlightBlockNone
+                        highlightChar    = self._highlightCharWarn
+                        highlightBlock   = self._highlightBlockWarn
 
 
-                cursor.setPosition( begin, QTextCursor.MoveAnchor )
-                cursor.setPosition( end, QTextCursor.KeepAnchor )
+                    else:
+                        highlightChar    = self._highlightCharNone
+                        highlightBlock   = self._highlightBlockNone
 
-                Any.requireIsInstance( highlightChar, QTextCharFormat )
-                cursor.setCharFormat( highlightChar )
 
-                Any.requireIsInstance( highlightBlock, QTextBlockFormat )
-                cursor.setBlockFormat( highlightBlock )
+                    cursor.setPosition( begin, QTextCursor.MoveAnchor )
+                    cursor.setPosition( end, QTextCursor.KeepAnchor )
 
-                self._cursorToEnd()
+                    Any.requireIsInstance( highlightChar, QTextCharFormat )
+                    cursor.setCharFormat( highlightChar )
+
+                    Any.requireIsInstance( highlightBlock, QTextBlockFormat )
+                    cursor.setBlockFormat( highlightBlock )
+
+                    self._cursorToEnd()
 
 
         def _clearTerminal( self ):
