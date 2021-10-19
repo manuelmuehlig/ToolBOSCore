@@ -672,33 +672,6 @@ class TerminalWidget( QWidget, object ):
 
                     cursor = self._printText( text, html=html )
 
-                    if text.find( 'error:' ) >= 0 or \
-                       text.find( '[ERROR]' ) >= 0 or \
-                       text.find( 'make: *** [all] Error' ) >= 0:
-
-                        highlightChar    = self._highlightCharError
-                        highlightBlock   = self._highlightBlockError
-                        self._autoScroll = False
-
-                    elif text.find( 'warning:' ) >= 0 or \
-                         text.find( '[WARNING]' ) >= 0:
-
-                        highlightChar    = self._highlightCharWarn
-                        highlightBlock   = self._highlightBlockWarn
-                    else:
-                        highlightChar    = self._highlightCharNone
-                        highlightBlock   = self._highlightBlockNone
-
-                    # cursor.setPosition( begin, QTextCursor.MoveAnchor )
-                    # cursor.setPosition( end, QTextCursor.KeepAnchor )
-                    cursor.select( QTextCursor.LineUnderCursor )
-
-                    Any.requireIsInstance( highlightChar, QTextCharFormat )
-                    cursor.setCharFormat( highlightChar )
-
-                    Any.requireIsInstance( highlightBlock, QTextBlockFormat )
-                    cursor.setBlockFormat( highlightBlock )
-
                     if cursor.hasSelection():
                         cursor.clearSelection()
 
@@ -742,16 +715,46 @@ class TerminalWidget( QWidget, object ):
 
                 cursor = QTextCursor( self.document().findBlockByLineNumber( self._terminalCurrentLine ) )
                 cursor.select( QTextCursor.LineUnderCursor )
+                cursor.removeSelectedText()
+
+            begin = cursor.position()
 
             if html:
                 cursor.insertHtml( text )
             else:
                 cursor.insertText( text )
 
+            end = cursor.position()
+
             if cursor.hasSelection():
                 cursor.clearSelection()
 
+            cursor.setPosition( begin, QTextCursor.MoveAnchor )
+            cursor.setPosition( end, QTextCursor.KeepAnchor )
+
+            if text.find('error:') >= 0 or \
+                text.find('[ERROR]') >= 0 or \
+                text.find('make: *** [all] Error') >= 0:
+
+                highlightChar = self._highlightCharError
+                highlightBlock = self._highlightBlockError
+                self._autoScroll = False
+
+            elif text.find( 'warning:' ) >= 0 or text.find( '[WARNING]' ) >= 0:
+
+                highlightChar = self._highlightCharWarn
+                highlightBlock = self._highlightBlockWarn
+            else:
+                highlightChar = self._highlightCharNone
+                highlightBlock = self._highlightBlockNone
+
             self.setTextCursor( cursor )
+
+            Any.requireIsInstance( highlightChar, QTextCharFormat )
+            cursor.setCharFormat( highlightChar )
+
+            Any.requireIsInstance( highlightBlock, QTextBlockFormat )
+            cursor.setBlockFormat( highlightBlock )
 
             if not self._autoScroll:
                 scrollBar.setValue( oldScrollBarPos )
