@@ -590,7 +590,7 @@ class TerminalWidget( QWidget, object ):
             self._terminalCurrentLine     = 0
             self._terminalLines           = 0
 
-            self._defaultFont             = QFont( "Monospace", 9, QFont.Monospace )
+            self._defaultFont             = QFont( "Courier New", 9, QFont.Monospace )
             self._defaultFont.setStyleHint( QFont.TypeWriter )
 
             self.setFont( self._defaultFont )
