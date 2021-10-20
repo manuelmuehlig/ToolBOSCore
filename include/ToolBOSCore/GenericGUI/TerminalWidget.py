@@ -759,6 +759,9 @@ class TerminalWidget( QWidget, object ):
             if not self._autoScroll:
                 scrollBar.setValue( oldScrollBarPos )
 
+            cursor.clearSelection()
+            self.setTextCursor( cursor )
+
             return cursor
 
 
