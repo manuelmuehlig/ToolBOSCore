@@ -664,6 +664,13 @@ class TerminalWidget( QWidget, object ):
         def writeText( self, toWrite, html=False ):
             if not self._frozen:
 
+                currentCursor = self.textCursor()
+                begin = None
+                end = None
+                if currentCursor.hasSelection():
+                    begin = currentCursor.selectionStart()
+                    end = currentCursor.selectionEnd()
+
                 for line in toWrite.split('\n'):
                     if not line:
                         continue
@@ -676,6 +683,11 @@ class TerminalWidget( QWidget, object ):
                         cursor.clearSelection()
 
                     self._terminalCurrentLine += 1
+
+                if begin and end:
+                    currentCursor.setPosition( begin, QTextCursor.MoveAnchor )
+                    currentCursor.setPosition( end, QTextCursor.KeepAnchor )
+                    self.setTextCursor( currentCursor )
 
 
         def _clearTerminal( self ):
@@ -704,7 +716,6 @@ class TerminalWidget( QWidget, object ):
             if not self._terminalLineLimit or self._terminalLines < self._terminalLineLimit:
                 cursor = self.textCursor()
                 cursor.movePosition( QTextCursor.End, QTextCursor.MoveAnchor )
-                self.setTextCursor( cursor )
                 # when appending we need a \n to create a new line
                 text += '\n'
 
@@ -726,9 +737,6 @@ class TerminalWidget( QWidget, object ):
 
             end = cursor.position()
 
-            if cursor.hasSelection():
-                cursor.clearSelection()
-
             cursor.setPosition( begin, QTextCursor.MoveAnchor )
             cursor.setPosition( end, QTextCursor.KeepAnchor )
 
@@ -748,8 +756,6 @@ class TerminalWidget( QWidget, object ):
                 highlightChar = self._highlightCharNone
                 highlightBlock = self._highlightBlockNone
 
-            self.setTextCursor( cursor )
-
             Any.requireIsInstance( highlightChar, QTextCharFormat )
             cursor.setCharFormat( highlightChar )
 
@@ -759,7 +765,8 @@ class TerminalWidget( QWidget, object ):
             if not self._autoScroll:
                 scrollBar.setValue( oldScrollBarPos )
 
-            cursor.clearSelection()
+            # Move the cursor to the end to avoid to highlight the selection
+            cursor.setPosition( end, QTextCursor.MoveAnchor )
             self.setTextCursor( cursor )
 
             return cursor
