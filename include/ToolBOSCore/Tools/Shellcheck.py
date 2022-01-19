@@ -34,46 +34,50 @@
 #
 #
 
-from ToolBOSCore.Util import FastScript
-from ToolBOSCore.Settings import ProcessEnv
+
 import io
-import subprocess
 import logging
+import subprocess
 
-
-# We use the gcc-style error-reporting of shellcheck, since it is compact
-# and we do not need to really parse the output.
-# We always know which codes have been checked, because we pass them with
-# --include.
-# .shellcheckrc-files are ignored, so that people don't bypass the checks.
-# The shell-dialect is fixed as "bash".
-_shellcheckCmd = 'shellcheck --format=gcc --include=%s --norc --shell=bash %s'
+from ToolBOSCore.Settings import ProcessEnv
+from ToolBOSCore.Util     import FastScript
 
 
 def checkScript( scriptPath, codes, enable=None ):
-    sout = io.StringIO()
-    serr = io.StringIO()
+    ProcessEnv.requireCommand( 'shellcheck' )
 
-    failed = False
+    stdout         = io.StringIO()
+    stderr         = io.StringIO()
+    failed         = False
     reportedIssues = []
-    cmd = _shellcheckCmd % (codes, scriptPath)
+
+
+    # We use the gcc-style error-reporting of shellcheck, since it is compact
+    # and we do not need to really parse the output.
+    # We always know which codes have been checked, because we pass them with
+    # --include.
+    # .shellcheckrc-files are ignored, so that people don't bypass the checks.
+    # The shell-dialect is fixed as "bash".
+    #
+    cmd = f'shellcheck --format=gcc --include={codes} --norc --shell=bash {scriptPath}'
+
     if enable:
-        cmd = '%s --enable=%s' % (cmd, enable)
+        cmd += f' --enable={enable}'
+
     try:
-        ProcessEnv.requireCommand('shellcheck')
-        FastScript.execProgram( cmd, stdout=sout, stderr=serr )
+        FastScript.execProgram( cmd, stdout=stdout, stderr=stderr )
     except subprocess.CalledProcessError as e:
-        if serr.getvalue() != '':  # We have a real error.
-            logging.error( serr.getvalue() )
+        if stderr.getvalue() != '':  # We have a real error.
+            logging.error( stderr.getvalue() )
             raise e
         else:  # Just non-zero exit-status of shellcheck, i.e. issues found.
-            reportedIssues = sout.getvalue().splitlines()
+            reportedIssues = stdout.getvalue().splitlines()
             failed = True
-    except OSError as e:
-        logging.error( e )
-        logging.error( 'shellcheck is not installed or not in the PATH.')
 
-    sout.close()
-    serr.close()
+    stdout.close()
+    stderr.close()
 
     return failed, reportedIssues
+
+
+# EOF
