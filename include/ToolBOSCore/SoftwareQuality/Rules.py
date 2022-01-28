@@ -3294,22 +3294,59 @@ hand is straight-forward.
 '''
 
     goodExample = '''
-    users=('Adam Wilson' 'Brian May' 'Maggy Reilly')
-    for user in "${users[@]}"; do
-       echo "${user}"
-    done
+    #!/bin/bash
+    
+    # Context before
+    # I want to see this line in this file.
+    # Context after
+    
+    # You will see me, too.
+    args=(-A1 -B1 "in this file")
+    # And me.
+    grep "${args[@]}" "${0}"
     '''
 
     badExample  = '''
-    users="'Adam Wilson' 'Brian May' 'Maggy Reilly'"
-    for user in ${users}; do
-       echo "${user}"
-    done
+    #!/bin/bash
+    
+    # Context before
+    # I want to see this line in this file.
+    # Context after
+    
+    # You will see me, too.
+    args='-A1 -B1 "in this file"'
+    # And me.
+    grep ${args} "${0}"
     '''
 
     seeAlso     = { 'Shellcheck SC2089, SC2090': 'https://gist.github.com/eggplants/9fbe03453c3f3fd03295e88def6a1324#file-_shellcheck-md' }
 
     sqLevel     = frozenset( [ 'basic', 'advanced' ] )
+
+    def run( self, details, files ):
+        """
+            Checks that an array is used instead of a string when passing arguments.
+        """
+        logging.debug( "checking that an array is used instead of a string when passing arguments" )
+        passed = 0
+        failed = 0
+
+        for filePath in files:
+            results = Shellcheck.checkScript( filePath, '2089,2090' )
+            if results[0] == True:
+                logging.info( "BASH04: %s: string used for passing arguments", filePath )
+                failed += 1
+            else:
+                passed += 1
+
+        if failed == 0:
+            result = ( OK, passed, failed,
+                       "exclusively used arrays for passing arguments" )
+        else:
+            result = ( FAILED, passed, failed,
+                       "some arguments have been passed using strings" )
+
+        return result
 
 
 class Rule_BASH05( AbstractRule ):

@@ -635,7 +635,7 @@ def test_runC16_package_without_function_like_defines( toolBOSLibDetector ):
 def test_runBASH03_script_with_backticks( toolBOSCoreDetector ):
     """
         test rule BASH03 with scripts that use backticks for
-        command-substitution'
+        command-substitution
     """
     rule    = Rules.Rule_BASH03()
     details = toolBOSCoreDetector
@@ -651,13 +651,41 @@ def test_runBASH03_script_with_backticks( toolBOSCoreDetector ):
 def test_runBASH03_script_without_backticks( toolBOSCoreDetector ):
     """
         test rule BASH03 with scripts that do not use backticks for
-        command-substitution'
+        command-substitution
     """
     rule    = Rules.Rule_BASH03()
     details = toolBOSCoreDetector
 
     files   = { 'useFromHere.sh',
                 'unittest.sh'}
+
+    result  = rule.run( details, files )
+
+    assert result[0] == 'OK'
+
+
+def test_runBASH04_script_args_in_string( toolBOSCoreDetector ):
+    """
+        test rule BASH04 with scripts that pass args in a string
+    """
+    rule    = Rules.Rule_BASH04()
+    details = toolBOSCoreDetector
+
+    files   = { 'test/SoftwareQuality/TestData/argsInString.bash' }
+
+    result  = rule.run( details, files )
+
+    assert result[0] == 'FAILED'
+
+
+def test_runBASH04_script_args_in_array( toolBOSCoreDetector ):
+    """
+        test rule BASH04 with scripts that pass args in an array
+    """
+    rule    = Rules.Rule_BASH04()
+    details = toolBOSCoreDetector
+
+    files   = { 'test/SoftwareQuality/TestData/argsInArray.bash'}
 
     result  = rule.run( details, files )
 
